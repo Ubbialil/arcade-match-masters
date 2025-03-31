@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Players from "./pages/Players";
+import PlayerProfile from "./pages/PlayerProfile";
 import Matches from "./pages/Matches";
 import CreateMatch from "./pages/CreateMatch";
 import NotFound from "./pages/NotFound";
@@ -27,6 +28,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/players" element={<Players />} />
+                <Route path="/players/:id" element={<PlayerProfile />} />
                 <Route path="/matches" element={<Matches />} />
                 <Route path="/create-match" element={<CreateMatch />} />
                 <Route path="*" element={<NotFound />} />
