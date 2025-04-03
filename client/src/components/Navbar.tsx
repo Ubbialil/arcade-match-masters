@@ -18,7 +18,7 @@ const Navbar = () => {
               <CircleDot className="w-5 h-5 text-black" strokeWidth={2.5} />
             </div>
             <span className="text-xl md:text-2xl font-arcade text-white">
-              HBS <span className="text-primary glow-text">PING</span> <span className="text-white glow-text">PONG</span>
+              HBS <span className="text-primary glow-text">AAA</span> <span className="text-white glow-text">PONG</span>
             </span>
           </Link>
 

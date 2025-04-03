@@ -1,5 +1,4 @@
-
-import { Player } from '@/context/AppContext';
+import { Player } from '@/services/api';
 import { Trophy, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -20,12 +19,12 @@ const PlayerCard = ({
 }: PlayerCardProps) => {
   return (
     <Link 
-      to={`/players/${player.id}`}
+      to={`/players/${player._id}`}
       className={`
         arcade-card relative overflow-hidden 
         transition-all duration-200 
         ${onSelect ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}
-        ${selected ? 'ring-2 ring-arcade-green' : ''}
+        ${selected ? 'ring-2 ring-primary' : ''}
       `}
       onClick={onSelect ? (e) => {
         e.preventDefault(); // Prevent navigation when used as a selectable card
@@ -33,7 +32,7 @@ const PlayerCard = ({
       } : undefined}
     >
       {rank && (
-        <div className="absolute top-0 left-0 bg-arcade-blue px-3 py-1">
+        <div className="absolute top-0 left-0 bg-primary px-3 py-1">
           <span className="font-pixel text-white">#{rank}</span>
         </div>
       )}
@@ -45,14 +44,14 @@ const PlayerCard = ({
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-arcade-red/90 text-white hover:bg-arcade-red transition-colors"
+          className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/90 text-white hover:bg-red-500 transition-colors"
           aria-label="Remove player"
         >
           <X className="w-5 h-5" />
         </button>
       )}
       
-      <div className="flex items-center p-4">
+      <div className="flex items-center gap-4 p-4">
         <div className="pixel-box w-16 h-16 flex-shrink-0">
           <img 
             src={player.avatar} 
@@ -66,14 +65,14 @@ const PlayerCard = ({
           
           <div className="flex items-center text-sm">
             <div className="text-white/70 mr-4">
-              <span className="font-bold text-arcade-yellow">{player.wins}</span> W
+              <span className="font-bold text-primary">{player.wins || 0}</span> W
             </div>
             <div className="text-white/70 mr-4">
-              <span className="font-bold text-arcade-red">{player.losses}</span> L
+              <span className="font-bold text-red-500">{player.losses || 0}</span> L
             </div>
             <div className="text-white/70">
-              <Trophy className="h-3 w-3 inline mr-1 text-arcade-gold" />
-              <span className="font-bold">{player.rating}</span>
+              <Trophy className="h-3 w-3 inline mr-1 text-primary" />
+              <span className="font-bold">{player.rating || 1000}</span>
             </div>
           </div>
         </div>

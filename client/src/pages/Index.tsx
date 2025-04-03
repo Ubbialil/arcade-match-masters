@@ -35,7 +35,7 @@ const Index = () => {
               <CircleDot className="w-16 h-16 text-primary" />
             </div>
             <h1 className="text-4xl font-arcade text-white">
-              HBS <span className="text-primary glow-text animate-blink">PING</span> <span className="text-white glow-text animate-blink">PONG</span>
+              HBS <span className="text-primary glow-text animate-blink">BBB</span> <span className="text-white glow-text animate-blink">PONG</span>
             </h1>
           </div>
         </div>
@@ -43,7 +43,7 @@ const Index = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          <div className="flex justify-between items-center mb-4">
+          {/* <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-arcade text-white">
               <span className="text-primary glow-text">HBS</span> Ping Pong
             </h1>
@@ -55,7 +55,7 @@ const Index = () => {
               <CircleDot className="w-4 h-4" />
               <span>New Match</span>
             </Link>
-          </div>
+          </div> */}
           
           {/* Active Matches */}
           <div>
@@ -129,7 +129,7 @@ const Index = () => {
         <div>
           <Leaderboard />
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 mt-8">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4 mt-8">
             <Link to="/players" className="arcade-card bg-gradient-to-br from-primary/20 to-primary/10 border-primary/20 flex items-center gap-4 hover:translate-y-[-5px] transition-transform">
               <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-primary/30">
                 <Users className="w-6 h-6 text-primary" />
@@ -149,7 +149,7 @@ const Index = () => {
                 <p className="text-white/60 text-sm font-pixel">Match history</p>
               </div>
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
