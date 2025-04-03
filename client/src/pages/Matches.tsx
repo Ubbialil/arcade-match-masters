@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import MatchItem from '@/components/MatchItem';
@@ -10,27 +9,27 @@ import { Link } from 'react-router-dom';
 const Matches = () => {
   const { matches } = useApp();
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [showFilters, setShowFilters] = useState(false);
+  // const [filterStatus, setFilterStatus] = useState<string>('all');
+  // const [showFilters, setShowFilters] = useState(false);
   
   // Filter and sort matches
   const filteredMatches = matches
-    .filter(match => {
-      if (filterStatus === 'all') return true;
-      return match.status === filterStatus;
-    })
+    // .filter(match => {
+    //   if (filterStatus === 'all') return true;
+    //   return match.status === filterStatus;
+    // })
     .sort((a, b) => {
       // Sort by date (newest first)
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
+      return new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime();
     });
   
-  const activeMatch = matches.find(m => m.id === activeMatchId);
+  const activeMatch = matches.find(m => m._id === activeMatchId);
   
   const handleMatchClick = (matchId: string) => {
-    const match = matches.find(m => m.id === matchId);
-    if (match && match.status === 'in-progress') {
+    // const match = matches.find(m => m._id === matchId);
+    // if (match && match.status === 'in-progress') {
       setActiveMatchId(matchId);
-    }
+    // }
   };
 
   return (
@@ -60,7 +59,7 @@ const Matches = () => {
         </div>
       )}
       
-      {/* Filters */}
+      {/* Filters - Temporarily disabled
       <div className="mb-6">
         <button
           className="flex items-center gap-2 text-white font-pixel mb-4 bg-white/5 px-4 py-2 rounded-md hover:bg-white/10 transition-colors"
@@ -98,16 +97,17 @@ const Matches = () => {
           </div>
         )}
       </div>
+      */}
       
       {/* Matches List */}
       <div className="grid grid-cols-1 gap-4 animate-slide-in-bottom">
         {filteredMatches.length > 0 ? (
           filteredMatches.map(match => (
             <MatchItem 
-              key={match.id} 
+              key={match._id} 
               match={match}
-              showActions={match.status === 'in-progress'}
-              onClick={() => handleMatchClick(match.id)}
+              showActions={false}
+              onClick={() => handleMatchClick(match._id)}
             />
           ))
         ) : (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Match } from '@/context/AppContext';
@@ -61,11 +60,7 @@ const ScoreTracker = ({ matchId, onFinish }: ScoreTrackerProps) => {
     }
   };
   
-  const finishMatch = (winnerId: string) => {
-    updateMatch(matchId, {
-      status: 'completed',
-      winner: winnerId,
-    });
+  const finishMatch = () => {
     setIsFinishModalOpen(false);
     onFinish();
   };
@@ -99,7 +94,7 @@ const ScoreTracker = ({ matchId, onFinish }: ScoreTrackerProps) => {
             </div>
             
             <button 
-              className="w-12 h-12 flex items-center justify-center bg-arcade-green/20 rounded-full text-arcade-green hover:bg-arcade-green/40 transition-colors"
+              className="w-12 h-12 flex items-center justify-center bg-white/10 rounded-full text-white hover:bg-white/20 transition-colors"
               onClick={incrementPlayer1}
             >
               <ChevronUp className="w-6 h-6" />
@@ -133,7 +128,7 @@ const ScoreTracker = ({ matchId, onFinish }: ScoreTrackerProps) => {
             </div>
             
             <button 
-              className="w-12 h-12 flex items-center justify-center bg-arcade-green/20 rounded-full text-arcade-green hover:bg-arcade-green/40 transition-colors"
+              className="w-12 h-12 flex items-center justify-center bg-white/10 rounded-full text-white hover:bg-white/20 transition-colors"
               onClick={incrementPlayer2}
             >
               <ChevronUp className="w-6 h-6" />
@@ -143,72 +138,34 @@ const ScoreTracker = ({ matchId, onFinish }: ScoreTrackerProps) => {
       </div>
       
       <div className="mt-8 flex justify-center">
-        <button 
-          className="arcade-button"
+        <button
           onClick={() => setIsFinishModalOpen(true)}
+          className="px-6 py-2 bg-arcade-blue text-white rounded-md hover:bg-arcade-blue/80 transition-colors flex items-center gap-2"
         >
-          <Trophy className="w-4 h-4" />
-          <span>End Match</span>
+          <Trophy className="w-5 h-5" />
+          <span>Fine Partita</span>
         </button>
       </div>
       
-      {/* Finish Match Modal */}
       {isFinishModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm p-4">
-          <div className="arcade-card max-w-md w-full animate-scale-in">
-            <div className="mb-4 flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-arcade-red" />
-              <h3 className="text-xl font-arcade text-white">End Match</h3>
-            </div>
-            
-            <p className="text-white/70 font-pixel mb-6">
-              Who won this match? This will finalize the scores and update player rankings.
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="bg-arcade-dark p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-xl font-arcade text-white mb-4 text-center">Conferma Fine Partita</h3>
+            <p className="text-white/80 text-center mb-6">
+              Sei sicuro di voler terminare la partita?
             </p>
-            
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <button 
-                className={cn(
-                  "p-4 rounded-md bg-arcade-blue/10 border border-arcade-blue/30 flex flex-col items-center hover:bg-arcade-blue/20 transition-colors",
-                  player1Score > player2Score ? "ring-2 ring-arcade-blue/50" : ""
-                )}
-                onClick={() => finishMatch(player1.id)}
-              >
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-black/30 mb-2">
-                  <img 
-                    src={player1.avatar} 
-                    alt={player1.name} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-white font-pixel text-center">{player1.name}</span>
-                <span className="text-2xl font-digital text-white mt-2">{player1Score}</span>
-              </button>
-              
-              <button 
-                className={cn(
-                  "p-4 rounded-md bg-arcade-blue/10 border border-arcade-blue/30 flex flex-col items-center hover:bg-arcade-blue/20 transition-colors",
-                  player2Score > player1Score ? "ring-2 ring-arcade-blue/50" : ""
-                )}
-                onClick={() => finishMatch(player2.id)}
-              >
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-black/30 mb-2">
-                  <img 
-                    src={player2.avatar} 
-                    alt={player2.name} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="text-white font-pixel text-center">{player2.name}</span>
-                <span className="text-2xl font-digital text-white mt-2">{player2Score}</span>
-              </button>
-            </div>
-            
-            <div className="flex justify-center">
-              <button 
-                className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-md font-pixel transition-colors"
+            <div className="flex justify-center gap-4">
+              <button
                 onClick={() => setIsFinishModalOpen(false)}
+                className="px-4 py-2 bg-white/10 text-white rounded-md hover:bg-white/20 transition-colors"
               >
-                Cancel
+                Annulla
+              </button>
+              <button
+                onClick={finishMatch}
+                className="px-4 py-2 bg-arcade-blue text-white rounded-md hover:bg-arcade-blue/80 transition-colors"
+              >
+                Conferma
               </button>
             </div>
           </div>

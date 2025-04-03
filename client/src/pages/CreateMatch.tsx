@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
-import { Gamepad, CalendarDays, Clock, AlertCircle, ChevronLeft } from 'lucide-react';
+import { Gamepad, CalendarDays, Clock, ChevronLeft, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -13,9 +12,10 @@ const CreateMatch = () => {
   
   const [player1Id, setPlayer1Id] = useState('');
   const [player2Id, setPlayer2Id] = useState('');
+  const [player1Score, setPlayer1Score] = useState(0);
+  const [player2Score, setPlayer2Score] = useState(0);
   const [matchDate, setMatchDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [matchTime, setMatchTime] = useState(format(new Date(), 'HH:mm'));
-  const [status, setStatus] = useState<'scheduled' | 'in-progress'>('scheduled');
   const [errors, setErrors] = useState<Record<string, string>>({});
   
   // Reset errors when inputs change
@@ -50,33 +50,31 @@ const CreateMatch = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
     
-    // Create match date
-    const dateTime = new Date(`${matchDate}T${matchTime}`);
-    
-    // Create new match
-    addMatch({
-      player1Id,
-      player2Id,
-      player1Score: 0,
-      player2Score: 0,
-      date: dateTime.toISOString(),
-      status
-    });
-    
-    toast.success('Match created successfully!');
-    
-    // Redirect based on match status
-    if (status === 'in-progress') {
+    try {
+      // Create match date
+      const dateTime = new Date(`${matchDate}T${matchTime}`);
+      
+      // Create new match
+      await addMatch({
+        player1: player1Id,
+        player2: player2Id,
+        player1Score,
+        player2Score,
+        playedAt: dateTime.toISOString()
+      });
+      
+      toast.success('Match created successfully!');
       navigate('/matches');
-    } else {
-      navigate('/');
+    } catch (error) {
+      console.error('Error creating match:', error);
+      toast.error('Failed to create match. Please try again.');
     }
   };
 
@@ -114,7 +112,9 @@ const CreateMatch = () => {
                 >
                   <option value="">Select Player 1</option>
                   {players.map(player => (
-                    <option key={player.id} value={player.id}>{player.name}</option>
+                    <option key={player._id} value={player._id}>
+                      {player.name}
+                    </option>
                   ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -145,9 +145,11 @@ const CreateMatch = () => {
                 >
                   <option value="">Select Player 2</option>
                   {players
-                    .filter(player => player.id !== player1Id)
+                    .filter(player => player._id !== player1Id)
                     .map(player => (
-                      <option key={player.id} value={player.id}>{player.name}</option>
+                      <option key={player._id} value={player._id}>
+                        {player.name}
+                      </option>
                     ))
                   }
                 </select>
@@ -161,6 +163,30 @@ const CreateMatch = () => {
                   </p>
                 )}
               </div>
+            </div>
+            
+            {/* Player 1 Score */}
+            <div>
+              <label className="block text-white/70 font-pixel mb-2">Player 1 Score</label>
+              <input
+                type="number"
+                min="0"
+                value={player1Score}
+                onChange={(e) => setPlayer1Score(parseInt(e.target.value) || 0)}
+                className="bg-white/5 border text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 border-arcade-blue/20 focus:ring-arcade-blue/50"
+              />
+            </div>
+            
+            {/* Player 2 Score */}
+            <div>
+              <label className="block text-white/70 font-pixel mb-2">Player 2 Score</label>
+              <input
+                type="number"
+                min="0"
+                value={player2Score}
+                onChange={(e) => setPlayer2Score(parseInt(e.target.value) || 0)}
+                className="bg-white/5 border text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 border-arcade-blue/20 focus:ring-arcade-blue/50"
+              />
             </div>
             
             {/* Match Date */}
@@ -214,44 +240,13 @@ const CreateMatch = () => {
             </div>
           </div>
           
-          {/* Match Status */}
-          <div className="mb-8">
-            <label className="block text-white/70 font-pixel mb-3">Match Status</label>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                className={cn(
-                  "px-4 py-3 rounded-md font-pixel text-center transition-colors",
-                  status === 'scheduled' 
-                    ? "bg-arcade-blue text-white" 
-                    : "bg-white/5 text-white/70 hover:bg-white/10"
-                )}
-                onClick={() => setStatus('scheduled')}
-              >
-                Schedule for Later
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "px-4 py-3 rounded-md font-pixel text-center transition-colors",
-                  status === 'in-progress' 
-                    ? "bg-arcade-orange text-white" 
-                    : "bg-white/5 text-white/70 hover:bg-white/10"
-                )}
-                onClick={() => setStatus('in-progress')}
-              >
-                Start Now
-              </button>
-            </div>
-          </div>
-          
           <div className="flex justify-center">
-            <button 
+            <button
               type="submit"
               className="arcade-button px-8 py-3"
             >
               <Gamepad className="w-5 h-5" />
-              <span>{status === 'in-progress' ? 'Create & Start Match' : 'Create Match'}</span>
+              <span>Create Match</span>
             </button>
           </div>
         </form>

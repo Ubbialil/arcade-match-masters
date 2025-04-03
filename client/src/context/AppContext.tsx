@@ -1,34 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Player, Match, playerService, matchService } from '@/services/api';
 
-export type Player = {
-  id: string;
-  name: string;
-  avatar: string;
-  wins: number;
-  losses: number;
-  pointsScored: number;
-  rating: number;
-};
-
-export type Match = {
-  id: string;
-  player1Id: string;
-  player2Id: string;
-  player1Score: number;
-  player2Score: number;
-  date: string;
-  status: 'scheduled' | 'in-progress' | 'completed';
-  winner?: string;
-};
-
 interface AppContextType {
   players: Player[];
   matches: Match[];
   addPlayer: (player: Player) => void;
   getPlayer: (id: string) => Player | undefined;
-  addMatch: (match: Match) => void;
+  addMatch: (match: Omit<Match, '_id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   getMatch: (id: string) => Match | undefined;
+  reloadMatches: () => Promise<void>;
+  reloadPlayers: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -37,26 +18,39 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
 
+  const reloadPlayers = async () => {
+    try {
+      const playersData = await playerService.getAll();
+      const playersWithStats = playersData.map(player => ({
+        ...player,
+        rating: 1000,
+        wins: 0,
+        losses: 0,
+        pointsScored: 0,
+        avatarUrl: player.avatarUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(player.name)}&backgroundColor=0ea5e9`
+      }));
+      setPlayers(playersWithStats);
+    } catch (error) {
+      console.error('Error reloading players:', error);
+    }
+  };
+
+  const reloadMatches = async () => {
+    try {
+      const matchesData = await matchService.getAll();
+      setMatches(matchesData);
+    } catch (error) {
+      console.error('Error reloading matches:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [playersData, matchesData] = await Promise.all([
-          playerService.getAll(),
-          matchService.getAll()
+        await Promise.all([
+          reloadPlayers(),
+          reloadMatches()
         ]);
-
-        // Aggiungi dati aggiuntivi ai giocatori per la visualizzazione
-        const playersWithStats = playersData.map(player => ({
-          ...player,
-          rating: 1000,
-          wins: 0,
-          losses: 0,
-          pointsScored: 0,
-          avatar: `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(player.name)}&backgroundColor=0ea5e9`
-        }));
-
-        setPlayers(playersWithStats);
-        setMatches(matchesData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -73,8 +67,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return players.find(player => player._id === id);
   };
 
-  const addMatch = (match: Match) => {
-    setMatches(prev => [...prev, match]);
+  const addMatch = async (match: Omit<Match, '_id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      await matchService.create(match);
+      await Promise.all([
+        reloadMatches(),
+        reloadPlayers() // Ricarica anche i player per aggiornare le statistiche
+      ]);
+    } catch (error) {
+      console.error('Error adding match:', error);
+      throw error;
+    }
   };
 
   const getMatch = (id: string) => {
@@ -88,7 +91,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       addPlayer,
       getPlayer,
       addMatch,
-      getMatch
+      getMatch,
+      reloadMatches,
+      reloadPlayers
     }}>
       {children}
     </AppContext.Provider>

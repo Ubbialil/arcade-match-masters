@@ -1,29 +1,41 @@
-import { Schema, model, Types } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-interface IMatch {
-  player1: Types.ObjectId;
-  player2: Types.ObjectId;
-  winner: Types.ObjectId;
-  loser: Types.ObjectId;
-  score: {
-    player1: number;
-    player2: number;
-  };
-  date: Date;
+export interface IMatch extends Document {
+  player1: mongoose.Types.ObjectId;
+  player2: mongoose.Types.ObjectId;
+  player1Score: number;
+  player2Score: number;
+  playedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const matchSchema = new Schema<IMatch>({
-  player1: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
-  player2: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
-  winner: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
-  loser: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
-  score: {
-    player1: { type: Number, required: true },
-    player2: { type: Number, required: true }
+const matchSchema = new Schema({
+  player1: {
+    type: Schema.Types.ObjectId,
+    ref: 'Player',
+    required: true
   },
-  date: { type: Date, default: Date.now }
+  player2: {
+    type: Schema.Types.ObjectId,
+    ref: 'Player',
+    required: true
+  },
+  player1Score: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  player2Score: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  playedAt: {
+    type: Date,
+    required: true,
+    default: Date.now
+  }
 }, {
   timestamps: true
 });
@@ -32,15 +44,24 @@ const matchSchema = new Schema<IMatch>({
 matchSchema.post('save', async function(doc) {
   const { Player } = require('./Player');
   
+  // Determina il vincitore e il perdente
+  const isPlayer1Winner = doc.player1Score > doc.player2Score;
+  
   // Aggiorna le statistiche del vincitore
-  await Player.findByIdAndUpdate(doc.winner, {
-    $inc: { wins: 1 }
+  await Player.findByIdAndUpdate(isPlayer1Winner ? doc.player1 : doc.player2, {
+    $inc: { 
+      wins: 1,
+      rating: 25 // Aumenta il rating del vincitore
+    }
   });
 
   // Aggiorna le statistiche del perdente
-  await Player.findByIdAndUpdate(doc.loser, {
-    $inc: { losses: 1 }
+  await Player.findByIdAndUpdate(isPlayer1Winner ? doc.player2 : doc.player1, {
+    $inc: { 
+      losses: 1,
+      rating: -15 // Diminuisce il rating del perdente
+    }
   });
 });
 
-export const Match = model<IMatch>('Match', matchSchema); 
+export default mongoose.model<IMatch>('Match', matchSchema); 

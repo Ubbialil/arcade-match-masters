@@ -16,7 +16,7 @@ export interface Player {
   password: string;
   createdAt: string;
   updatedAt: string;
-  avatar?: string;
+  avatarUrl?: string;
   rating?: number;
   wins?: number;
   losses?: number;
@@ -25,16 +25,17 @@ export interface Player {
 
 export interface Match {
   _id: string;
-  player1: string;
-  player2: string;
-  winner: string;
-  score: string;
+  player1: Player;
+  player2: Player;
+  player1Score: number;
+  player2Score: number;
+  playedAt: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export const playerService = {
-  create: async (data: Omit<Player, '_id' | 'createdAt' | 'updatedAt' | 'avatar' | 'rating' | 'wins' | 'losses' | 'pointsScored'>) => {
+  create: async (data: Omit<Player, '_id' | 'createdAt' | 'updatedAt' | 'rating' | 'wins' | 'losses' | 'pointsScored'>) => {
     const response = await api.post<Player>('/players', data);
     return response.data;
   },
@@ -66,13 +67,13 @@ export const matchService = {
     return response.data;
   },
 
-  getAll: async () => {
-    const response = await api.get<Match[]>('/matches');
+  getAll: async (): Promise<Match[]> => {
+    const response = await api.get('/matches');
     return response.data;
   },
 
-  getById: async (id: string) => {
-    const response = await api.get<Match>(`/matches/${id}`);
+  getById: async (id: string): Promise<Match> => {
+    const response = await api.get(`/matches/${id}`);
     return response.data;
   },
 
@@ -86,8 +87,7 @@ export const matchService = {
     return response.data;
   },
 
-  delete: async (id: string) => {
-    const response = await api.delete(`/matches/${id}`);
-    return response.data;
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/matches/${id}`);
   }
 }; 

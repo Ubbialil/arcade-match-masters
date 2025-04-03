@@ -1,99 +1,92 @@
 import { Request, Response } from 'express';
-import { Match } from '../models/Match';
-import { Player } from '../models/Player';
+import Match from '../models/Match';
 
-export const matchController = {
-  // Ottieni tutte le partite
-  getAllMatches: async (req: Request, res: Response) => {
-    try {
-      const matches = await Match.find()
-        .populate('player1', 'name avatarUrl')
-        .populate('player2', 'name avatarUrl')
-        .populate('winner', 'name')
-        .populate('loser', 'name')
-        .sort({ date: -1 });
-      res.json(matches);
-    } catch (error) {
-      res.status(500).json({ message: 'Errore nel recupero delle partite', error });
+export const getAllMatches = async (req: Request, res: Response) => {
+  try {
+    const matches = await Match.find()
+      .populate('player1', '_id name avatar')
+      .populate('player2', '_id name avatar')
+      .sort({ playedAt: -1 });
+    res.json(matches);
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nel recupero dei match' });
+  }
+};
+
+export const getMatchById = async (req: Request, res: Response) => {
+  try {
+    const match = await Match.findById(req.params.id)
+      .populate('player1', '_id name avatar')
+      .populate('player2', '_id name avatar');
+    if (!match) {
+      return res.status(404).json({ message: 'Match non trovato' });
     }
-  },
+    res.json(match);
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nel recupero del match' });
+  }
+};
 
-  // Ottieni una partita specifica
-  getMatch: async (req: Request, res: Response) => {
-    try {
-      const match = await Match.findById(req.params.id)
-        .populate('player1', 'name avatarUrl')
-        .populate('player2', 'name avatarUrl')
-        .populate('winner', 'name')
-        .populate('loser', 'name');
-      if (!match) {
-        return res.status(404).json({ message: 'Partita non trovata' });
-      }
-      res.json(match);
-    } catch (error) {
-      res.status(500).json({ message: 'Errore nel recupero della partita', error });
-    }
-  },
+export const createMatch = async (req: Request, res: Response) => {
+  try {
+    const { player1, player2, player1Score, player2Score, playedAt } = req.body;
+    
+    const match = new Match({
+      player1,
+      player2,
+      player1Score,
+      player2Score,
+      playedAt: new Date(playedAt)
+    });
 
-  // Crea una nuova partita
-  createMatch: async (req: Request, res: Response) => {
-    try {
-      const { player1Id, player2Id, score } = req.body;
-
-      // Verifica che i giocatori esistano
-      const [player1, player2] = await Promise.all([
-        Player.findById(player1Id),
-        Player.findById(player2Id)
-      ]);
-
-      if (!player1 || !player2) {
-        return res.status(404).json({ message: 'Uno o entrambi i giocatori non trovati' });
-      }
-
-      // Determina vincitore e perdente
-      const winner = score.player1 > score.player2 ? player1Id : player2Id;
-      const loser = score.player1 > score.player2 ? player2Id : player1Id;
-
-      const match = new Match({
-        player1: player1Id,
-        player2: player2Id,
-        winner,
-        loser,
-        score: {
-          player1: score.player1,
-          player2: score.player2
-        }
-      });
-
-      await match.save();
+    await match.save();
+    
+    // Popola i dati dei player prima di inviare la risposta
+    const populatedMatch = await Match.findById(match._id)
+      .populate('player1', '_id name avatar')
+      .populate('player2', '_id name avatar');
       
-      const populatedMatch = await Match.findById(match._id)
-        .populate('player1', 'name avatarUrl')
-        .populate('player2', 'name avatarUrl')
-        .populate('winner', 'name')
-        .populate('loser', 'name');
+    res.status(201).json(populatedMatch);
+  } catch (error) {
+    console.error('Errore nella creazione del match:', error);
+    res.status(500).json({ message: 'Errore nella creazione del match' });
+  }
+};
 
-      res.status(201).json(populatedMatch);
-    } catch (error) {
-      res.status(400).json({ message: 'Errore nella creazione della partita', error });
+export const updateMatch = async (req: Request, res: Response) => {
+  try {
+    const { player1Score, player2Score, playedAt } = req.body;
+    const match = await Match.findById(req.params.id);
+    
+    if (!match) {
+      return res.status(404).json({ message: 'Match non trovato' });
     }
-  },
 
-  // Ottieni le partite di un giocatore specifico
-  getPlayerMatches: async (req: Request, res: Response) => {
-    try {
-      const playerId = req.params.playerId;
-      const matches = await Match.find({
-        $or: [{ player1: playerId }, { player2: playerId }]
-      })
-        .populate('player1', 'name avatarUrl')
-        .populate('player2', 'name avatarUrl')
-        .populate('winner', 'name')
-        .populate('loser', 'name')
-        .sort({ date: -1 });
-      res.json(matches);
-    } catch (error) {
-      res.status(500).json({ message: 'Errore nel recupero delle partite del giocatore', error });
+    match.player1Score = player1Score;
+    match.player2Score = player2Score;
+    match.playedAt = new Date(playedAt);
+
+    await match.save();
+    
+    // Popola i dati dei player prima di inviare la risposta
+    const updatedMatch = await Match.findById(match._id)
+      .populate('player1', '_id name avatar')
+      .populate('player2', '_id name avatar');
+      
+    res.json(updatedMatch);
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nell\'aggiornamento del match' });
+  }
+};
+
+export const deleteMatch = async (req: Request, res: Response) => {
+  try {
+    const match = await Match.findByIdAndDelete(req.params.id);
+    if (!match) {
+      return res.status(404).json({ message: 'Match non trovato' });
     }
+    res.json({ message: 'Match eliminato con successo' });
+  } catch (error) {
+    res.status(500).json({ message: 'Errore nell\'eliminazione del match' });
   }
 }; 
