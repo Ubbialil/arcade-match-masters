@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Calendar, Trophy, CircleDot } from 'lucide-react';
+import { Users, Calendar, Trophy, CircleDot, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Navbar = () => {
@@ -25,7 +25,7 @@ const Navbar = () => {
           <nav className="hidden md:flex">
             <ul className="flex items-center gap-1">
               {[
-                { path: '/', label: 'Leaderboard', icon: <Trophy /> },
+                // { path: '/', label: 'Leaderboard', icon: <Trophy /> },
                 { path: '/players', label: 'Players', icon: <Users /> },
                 { path: '/matches', label: 'Matches', icon: <Calendar /> },
               ].map((item) => (
@@ -49,7 +49,7 @@ const Navbar = () => {
                   to="/create-match"
                   className="arcade-button ml-2"
                 >
-                  <CircleDot className="w-4 h-4" />
+                  <Plus className="w-4 h-4" />
                   <span>New Match</span>
                 </Link>
               </li>

@@ -22,11 +22,11 @@ const MatchItem = ({ match, showActions = false, onClick }: MatchItemProps) => {
       onClick={onClick}
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <div className="px-2 py-1 rounded-md text-xs font-pixel bg-arcade-green/20 text-arcade-green">
             Completed
           </div>
-        </div>
+        </div> */}
         
         <div className="flex items-center text-white/60 text-sm font-pixel gap-2">
           <Calendar className="w-3 h-3" />

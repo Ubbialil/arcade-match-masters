@@ -36,17 +36,9 @@ const Matches = () => {
     <div className="arcade-container py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-arcade text-white flex items-center">
-          <Calendar className="w-8 h-8 mr-2 text-arcade-green" />
+          <Calendar className="w-8 h-8 mr-2 text-primary" />
           <span>Matches</span>
         </h1>
-        
-        <Link 
-          to="/create-match"
-          className="arcade-button"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Match</span>
-        </Link>
       </div>
       
       {/* Current Match Tracker */}
