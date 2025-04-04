@@ -80,18 +80,18 @@ const CreateMatch = () => {
 
   return (
     <div className="arcade-container py-8">
-      <button 
+      {/* <button 
         className="flex items-center gap-1 text-arcade-blue font-pixel mb-8 hover:underline"
         onClick={() => navigate(-1)}
       >
         <ChevronLeft className="w-4 h-4" />
         <span>Back</span>
-      </button>
+      </button> */}
       
       <div className="arcade-card max-w-2xl mx-auto animate-scale-in">
         <div className="flex items-center gap-2 mb-6">
           <Gamepad className="w-6 h-6 text-arcade-blue" />
-          <h1 className="text-2xl font-arcade text-white">Create New Matchss</h1>
+          <h1 className="text-2xl font-arcade text-white">Create New Match</h1>
         </div>
         
         <form onSubmit={handleSubmit}>

@@ -7,6 +7,7 @@ export interface IMatch extends Document {
   player1Score: number;
   player2Score: number;
   playedAt: Date;
+  status: 'scheduled' | 'completed';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +37,12 @@ const matchSchema = new Schema({
     type: Date,
     required: true,
     default: Date.now
+  },
+  status: {
+    type: String,
+    enum: ['scheduled', 'completed'],
+    default: 'scheduled',
+    required: true
   }
 }, {
   timestamps: true

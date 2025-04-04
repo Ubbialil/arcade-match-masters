@@ -32,6 +32,7 @@ export interface Match {
   player1Score: number;
   player2Score: number;
   playedAt: string;
+  status: 'scheduled' | 'completed';
   createdAt: string;
   updatedAt: string;
 }

@@ -31,12 +31,16 @@ export const createMatch = async (req: Request, res: Response) => {
   try {
     const { player1, player2, player1Score, player2Score, playedAt } = req.body;
     
+    // Se sono presenti i punteggi, il match è completato
+    const status = (player1Score !== undefined && player2Score !== undefined) ? 'completed' : 'scheduled';
+    
     const match = new Match({
       player1,
       player2,
       player1Score,
       player2Score,
-      playedAt: new Date(playedAt)
+      playedAt: new Date(playedAt),
+      status
     });
 
     await match.save();
@@ -60,6 +64,11 @@ export const updateMatch = async (req: Request, res: Response) => {
     
     if (!match) {
       return res.status(404).json({ message: 'Match non trovato' });
+    }
+
+    // Se vengono forniti i punteggi, il match diventa completato
+    if (player1Score !== undefined && player2Score !== undefined) {
+      match.status = 'completed';
     }
 
     match.player1Score = player1Score;

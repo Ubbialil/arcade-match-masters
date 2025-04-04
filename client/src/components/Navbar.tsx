@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Calendar, Trophy, CircleDot, Plus } from 'lucide-react';
+import { Users, Calendar, Trophy, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Navbar = () => {
@@ -15,10 +15,10 @@ const Navbar = () => {
         <div className="flex items-center justify-between py-3">
           <Link to="/" className="flex items-center gap-2 group">
             <div className="relative w-10 h-10 flex items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary/80 animate-pulse-glow">
-              <CircleDot className="w-5 h-5 text-black" strokeWidth={2.5} />
+              <Trophy className="w-5 h-5 text-black" strokeWidth={2.5} />
             </div>
             <span className="text-xl md:text-2xl font-arcade text-white">
-              HBS <span className="text-primary glow-text">AAA</span> <span className="text-white glow-text">PONG</span>
+              HBS <span className="text-primary glow-text">PING</span> <span className="text-white glow-text">PONG</span>
             </span>
           </Link>
 
@@ -59,10 +59,10 @@ const Navbar = () => {
           <nav className="md:hidden">
             <ul className="flex items-center gap-1">
               {[
-                { path: '/', label: 'Leaderboard', icon: <Trophy /> },
+                // { path: '/', label: 'Leaderboard', icon: <Trophy /> },
                 { path: '/players', label: 'Players', icon: <Users /> },
                 { path: '/matches', label: 'Matches', icon: <Calendar /> },
-                { path: '/create-match', label: 'New Match', icon: <CircleDot /> },
+                { path: '/create-match', label: 'New Match', icon: <Plus /> },
               ].map((item) => (
                 <li key={item.path}>
                   <Link

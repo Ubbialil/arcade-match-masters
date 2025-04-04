@@ -3,7 +3,7 @@ import { useApp } from '@/context/AppContext';
 import Leaderboard from '@/components/Leaderboard';
 import MatchItem from '@/components/MatchItem';
 import { Link } from 'react-router-dom';
-import { CircleDot, Calendar, ArrowRight, Trophy, Users } from 'lucide-react';
+import { Calendar, ArrowRight, Trophy, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -23,9 +23,8 @@ const Index = () => {
   
   // Recent matches
   const recentMatches = matches
-    .filter(match => match.status === 'completed')
     .sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime())
-    .slice(0, 3);
+    .slice(0, 5);
   
   // Hide intro after a delay
   useEffect(() => {
@@ -41,23 +40,22 @@ const Index = () => {
     
     setIsLoading(true);
     try {
-      const newMatch = await matchService.create({
-        player1: selectedPlayer1._id,
-        player2: selectedPlayer2._id,
+      await addMatch({
+        player1: selectedPlayer1,
+        player2: selectedPlayer2,
         player1Score,
         player2Score,
-        status: 'completed',
-        playedAt: new Date().toISOString()
+        playedAt: new Date().toISOString(),
+        status: 'completed'
       });
       
-      addMatch(newMatch);
+      setIsModalOpen(false);
       setSelectedPlayer1(null);
       setSelectedPlayer2(null);
       setPlayer1Score(0);
       setPlayer2Score(0);
-      setIsModalOpen(false);
     } catch (error) {
-      console.error('Errore durante l\'aggiunta del match:', error);
+      console.error('Error creating match:', error);
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +68,7 @@ const Index = () => {
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black">
           <div className="text-center">
             <div className="inline-block animate-pulse-glow rounded-xl mb-4">
-              <CircleDot className="w-16 h-16 text-primary" />
+              <Trophy className="w-16 h-16 text-primary" />
             </div>
             <h1 className="text-4xl font-arcade text-white">
               HBS <span className="text-primary glow-text animate-blink">BBB</span> <span className="text-white glow-text animate-blink">PONG</span>
@@ -79,43 +77,42 @@ const Index = () => {
         </div>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
-          {/* Recent Matches */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-arcade text-white">Recent Matches</h2>
-              </div>
-              
-              <Link to="/matches" className="text-primary font-pixel flex items-center gap-1 neon-underline">
-                <span>View All</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4">
-              {recentMatches.length > 0 ? (
-                recentMatches.map(match => (
-                  <MatchItem 
-                    key={match._id} 
-                    match={match}
-                    onClick={() => {}}
-                  />
-                ))
-              ) : (
-                <div className="arcade-card text-center py-8">
-                  <p className="text-white/60 font-pixel">No completed matches yet</p>
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Leaderboard - Now takes 3 columns */}
+        <div className="md:col-span-3">
+          <Leaderboard />
         </div>
         
-        {/* Sidebar */}
-        <div>
-          <Leaderboard />
+        {/* Recent Matches - Now takes 1 column and more compact */}
+        <div className="md:col-span-1">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-primary" />
+              <h2 className="text-lg font-arcade text-white">Recent</h2>
+            </div>
+            
+            <Link to="/matches" className="text-primary font-pixel flex items-center gap-1 neon-underline text-sm">
+              <span>All</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-3">
+            {recentMatches.length > 0 ? (
+              recentMatches.map(match => (
+                <MatchItem 
+                  key={match._id} 
+                  match={match}
+                  onClick={() => {}}
+                  compact={true}
+                />
+              ))
+            ) : (
+              <div className="arcade-card text-center py-6">
+                <p className="text-white/60 font-pixel text-sm">No matches yet</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -135,17 +132,23 @@ const Index = () => {
                 <SelectTrigger className="bg-arcade-dark border-arcade-purple text-white">
                   <SelectValue placeholder="Seleziona il primo giocatore" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-arcade-dark border border-arcade-purple">
                   {players.map((player) => (
-                    <SelectItem key={player._id} value={player._id} className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-black/30">
-                        <img 
-                          src={player.avatar} 
-                          alt={player.name} 
-                          className="w-full h-full object-cover"
-                        />
+                    <SelectItem 
+                      key={player._id} 
+                      value={player._id}
+                      className="relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-white outline-none focus:bg-arcade-purple/20 focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-arcade-purple/20 data-[highlighted]:text-white"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-black/30 border border-arcade-purple/50">
+                          <img 
+                            src={player.avatarUrl} 
+                            alt={player.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="font-pixel">{player.name}</span>
                       </div>
-                      <span>{player.name}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -158,17 +161,23 @@ const Index = () => {
                 <SelectTrigger className="bg-arcade-dark border-arcade-purple text-white">
                   <SelectValue placeholder="Seleziona il secondo giocatore" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-arcade-dark border border-arcade-purple">
                   {players.map((player) => (
-                    <SelectItem key={player._id} value={player._id} className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-black/30">
-                        <img 
-                          src={player.avatar} 
-                          alt={player.name} 
-                          className="w-full h-full object-cover"
-                        />
+                    <SelectItem 
+                      key={player._id} 
+                      value={player._id}
+                      className="relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-white outline-none focus:bg-arcade-purple/20 focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[highlighted]:bg-arcade-purple/20 data-[highlighted]:text-white"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-black/30 border border-arcade-purple/50">
+                          <img 
+                            src={player.avatarUrl} 
+                            alt={player.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="font-pixel">{player.name}</span>
                       </div>
-                      <span>{player.name}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
