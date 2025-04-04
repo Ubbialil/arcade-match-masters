@@ -1,4 +1,3 @@
-
 import { useApp } from '@/context/AppContext';
 import { Trophy, Medal, Award, TrendingUp, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -40,7 +39,7 @@ const Leaderboard = () => {
             return (
               <Link 
                 to="/players" 
-                key={player.id}
+                key={player._id}
                 className={cn(
                   "grid grid-cols-8 gap-4 p-3 hover:bg-arcade-blue/5 transition-colors",
                   index === 0 ? "bg-yellow-500/10" : 
@@ -63,7 +62,7 @@ const Leaderboard = () => {
                 <div className="col-span-3 md:col-span-2 flex items-center gap-2">
                   <div className="relative w-8 h-8 rounded-full overflow-hidden bg-black/30">
                     <img 
-                      src={player.avatar} 
+                      src={player.avatarUrl} 
                       alt={player.name} 
                       className="w-full h-full object-cover"
                     />
@@ -94,11 +93,11 @@ const Leaderboard = () => {
                   <div className="w-full bg-white/10 h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-green-500 to-arcade-blue rounded-full"
-                      style={{ width: `${winPercentage}%` }}
+                      style={{ width: `${player.winRate}%` }}
                     ></div>
                   </div>
                   <span className="ml-2 text-white/70 font-pixel text-sm">
-                    {winPercentage}%
+                    {player.winRate.toFixed(1)}%
                   </span>
                 </div>
                 

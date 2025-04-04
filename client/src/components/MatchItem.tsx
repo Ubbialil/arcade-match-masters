@@ -40,7 +40,7 @@ const MatchItem = ({ match, showActions = false, onClick }: MatchItemProps) => {
         <div className="flex flex-col items-center">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-black/30 mb-2">
             <img 
-              src={match.player1.avatarUrl} 
+              src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(match.player1.name)}&backgroundColor=0ea5e9`} 
               alt={match.player1.name} 
               className="w-full h-full object-cover"
             />
@@ -76,7 +76,7 @@ const MatchItem = ({ match, showActions = false, onClick }: MatchItemProps) => {
         <div className="flex flex-col items-center">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-black/30 mb-2">
             <img 
-              src={match.player2.avatarUrl} 
+              src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(match.player2.name)}&backgroundColor=0ea5e9`} 
               alt={match.player2.name} 
               className="w-full h-full object-cover"
             />

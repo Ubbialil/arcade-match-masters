@@ -14,13 +14,15 @@ export interface Player {
   name: string;
   email: string;
   password: string;
+  avatarUrl?: string;
+  rating: number;
+  wins: number;
+  losses: number;
+  matchesPlayed?: number;
+  winRate?: number;
+  pointsScored: number;
   createdAt: string;
   updatedAt: string;
-  avatarUrl?: string;
-  rating?: number;
-  wins?: number;
-  losses?: number;
-  pointsScored?: number;
 }
 
 export interface Match {
@@ -35,7 +37,7 @@ export interface Match {
 }
 
 export const playerService = {
-  create: async (data: Omit<Player, '_id' | 'createdAt' | 'updatedAt' | 'rating' | 'wins' | 'losses' | 'pointsScored'>) => {
+  create: async (data: Omit<Player, '_id' | 'createdAt' | 'updatedAt' | 'rating' | 'wins' | 'losses' | 'matchesPlayed' | 'winRate' | 'pointsScored'>) => {
     const response = await api.post<Player>('/players', data);
     return response.data;
   },

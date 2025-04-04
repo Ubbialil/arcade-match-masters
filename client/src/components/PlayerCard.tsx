@@ -54,7 +54,7 @@ const PlayerCard = ({
       <div className="flex items-center gap-4 p-4">
         <div className="pixel-box w-16 h-16 flex-shrink-0">
           <img 
-            src={player.avatar} 
+            src={player.avatarUrl} 
             alt={player.name} 
             className="w-full h-full object-cover"
           />
@@ -65,16 +65,24 @@ const PlayerCard = ({
           
           <div className="flex items-center text-sm">
             <div className="text-white/70 mr-4">
-              <span className="font-bold text-primary">{player.wins || 0}</span> W
+              <span className="font-bold text-primary">{player.wins}</span> W
             </div>
             <div className="text-white/70 mr-4">
-              <span className="font-bold text-red-500">{player.losses || 0}</span> L
+              <span className="font-bold text-red-500">{player.losses}</span> L
+            </div>
+            <div className="text-white/70 mr-4">
+              <span className="font-bold text-arcade-green">{player.winRate.toFixed(1)}%</span>
             </div>
             <div className="text-white/70">
               <Trophy className="h-3 w-3 inline mr-1 text-primary" />
-              <span className="font-bold">{player.rating || 1000}</span>
+              <span className="font-bold">{player.rating}</span>
             </div>
           </div>
+          
+          {/* <div className="mt-2 text-xs text-white/50">
+            <div>Partite giocate: {player.matchesPlayed}</div>
+            <div>Punti segnati: {player.pointsScored}</div>
+          </div> */}
         </div>
       </div>
     </Link>

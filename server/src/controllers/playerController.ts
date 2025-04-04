@@ -28,8 +28,26 @@ export const playerController = {
   // Crea un nuovo giocatore
   createPlayer: async (req: Request, res: Response) => {
     try {
-      const { name, email, avatarUrl } = req.body;
-      const player = new Player({ name, email, avatarUrl });
+      const { name, email, password, avatarUrl } = req.body;
+      
+      // Validazione dei campi obbligatori
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: 'Nome, email e password sono obbligatori' });
+      }
+
+      const player = new Player({
+        name,
+        email,
+        password,
+        avatarUrl,
+        rating: 1000, // Rating iniziale
+        wins: 0,
+        losses: 0,
+        matchesPlayed: 0,
+        winRate: 0,
+        pointsScored: 0
+      });
+
       await player.save();
       res.status(201).json(player);
     } catch (error) {

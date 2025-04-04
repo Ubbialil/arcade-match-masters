@@ -21,15 +21,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const reloadPlayers = async () => {
     try {
       const playersData = await playerService.getAll();
-      const playersWithStats = playersData.map(player => ({
+      const playersWithAvatars = playersData.map(player => ({
         ...player,
-        rating: 1000,
-        wins: 0,
-        losses: 0,
-        pointsScored: 0,
         avatarUrl: player.avatarUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(player.name)}&backgroundColor=0ea5e9`
       }));
-      setPlayers(playersWithStats);
+      setPlayers(playersWithAvatars);
     } catch (error) {
       console.error('Error reloading players:', error);
     }

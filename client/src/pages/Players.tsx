@@ -98,22 +98,22 @@ const Players = () => {
       
       {/* Modal Aggiungi Giocatore */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-arcade-dark border-arcade-purple">
+        <DialogContent className="bg-arcade-dark border border-arcade-blue/20 shadow-lg shadow-arcade-blue/20">
           <DialogHeader>
-            <DialogTitle className="text-arcade-purple">Aggiungi Giocatore</DialogTitle>
-            <DialogDescription className="text-arcade-purple/80">
-              Inserisci il nome del nuovo giocatore
-            </DialogDescription>
+            <DialogTitle className="text-2xl font-arcade text-white flex items-center gap-2">
+              <Plus className="w-6 h-6 text-arcade-blue" />
+              <span>Aggiungi Giocatore</span>
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-arcade-purple">Nome</Label>
+              <Label htmlFor="name" className="text-white/70 font-pixel">Nome</Label>
               <Input
                 id="name"
                 value={newPlayerName}
                 onChange={(e) => setNewPlayerName(e.target.value)}
                 placeholder="Nome del giocatore"
-                className="bg-arcade-dark border-arcade-purple text-white"
+                className="bg-white/5 border-arcade-blue/20 text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-arcade-blue/50"
               />
             </div>
           </div>
@@ -121,7 +121,7 @@ const Players = () => {
             <Button
               onClick={handleAddPlayer}
               disabled={!newPlayerName.trim() || isLoading}
-              className="bg-arcade-purple hover:bg-arcade-purple/90"
+              className="bg-primary hover:bg-primary/90 text-black font-pixel py-3 px-6 rounded-md shadow-md shadow-primary/30"
             >
               {isLoading ? 'Aggiungimento...' : 'Aggiungi Giocatore'}
             </Button>
