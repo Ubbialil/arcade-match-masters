@@ -1,15 +1,15 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
 import { Trophy, ArrowLeft, User, Star, Activity, Award } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { Match } from '@/services/api';
 
 const PlayerProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { getPlayer, matches } = useApp();
   const player = getPlayer(id || '');
-  const [recentMatches, setRecentMatches] = useState<any[]>([]);
+  const [recentMatches, setRecentMatches] = useState<Match[]>([]);
   const [stats, setStats] = useState({
     winRate: 0,
     averageScore: 0,
@@ -22,8 +22,8 @@ const PlayerProfile = () => {
 
     // Get matches for this player
     const playerMatches = matches.filter(
-      m => m.player1Id === player.id || m.player2Id === player.id
-    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      m => m.player1._id === player._id || m.player2._id === player._id
+    ).sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime());
     
     // Take only the 5 most recent matches
     setRecentMatches(playerMatches.slice(0, 5));
@@ -38,7 +38,7 @@ const PlayerProfile = () => {
       let highestScore = 0;
       
       playerMatches.forEach(match => {
-        const playerScore = match.player1Id === player.id ? match.player1Score : match.player2Score;
+        const playerScore = match.player1._id === player._id ? match.player1Score : match.player2Score;
         totalScore += playerScore;
         if (playerScore > highestScore) highestScore = playerScore;
       });
@@ -48,11 +48,14 @@ const PlayerProfile = () => {
       // Calculate longest win streak
       let currentStreak = 0;
       let longestStreak = 0;
-      const completedMatches = playerMatches.filter(m => m.status === 'completed')
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const completedMatches = playerMatches
+        .filter(m => m.status === 'completed')
+        .sort((a, b) => new Date(a.playedAt).getTime() - new Date(b.playedAt).getTime());
       
       completedMatches.forEach(match => {
-        if (match.winner === player.id) {
+        const isWinner = (match.player1._id === player._id && match.player1Score > match.player2Score) ||
+                        (match.player2._id === player._id && match.player2Score > match.player1Score);
+        if (isWinner) {
           currentStreak++;
           if (currentStreak > longestStreak) longestStreak = currentStreak;
         } else {
@@ -72,10 +75,10 @@ const PlayerProfile = () => {
   if (!player) {
     return (
       <div className="arcade-container py-12 text-center">
-        <h2 className="text-xl text-white mb-4">Player not found</h2>
+        <h2 className="text-xl text-white mb-4">Giocatore non trovato</h2>
         <Link to="/players" className="arcade-button inline-flex">
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Players</span>
+          <span>Torna ai Giocatori</span>
         </Link>
       </div>
     );
@@ -86,17 +89,27 @@ const PlayerProfile = () => {
       <div className="mb-8">
         <Link to="/players" className="text-white/70 hover:text-white flex items-center gap-2 font-pixel transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Players</span>
+          <span>Torna ai Giocatori</span>
         </Link>
         
         <div className="arcade-card p-8">
           <div className="md:flex items-center gap-8">
             <div className="pixel-box md:w-48 w-full mx-auto md:mx-0 aspect-square mb-8 md:mb-0 flex-shrink-0">
-              <img
-                src={player.avatar}
-                alt={player.name}
-                className="w-full h-full object-cover"
-              />
+              {player.avatarUrl ? (
+                <img
+                  src={player.avatarUrl}
+                  alt={player.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${player.name}`;
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-arcade-darker">
+                  <User className="w-12 h-12 text-white/50" />
+                </div>
+              )}
             </div>
             
             <div className="grow">
@@ -108,7 +121,7 @@ const PlayerProfile = () => {
                     <Trophy className="w-6 h-6 mx-auto text-arcade-gold" />
                   </div>
                   <div className="text-xl font-bold text-white">{player.wins}</div>
-                  <div className="text-white/60 text-sm">Wins</div>
+                  <div className="text-white/60 text-sm">Vittorie</div>
                 </div>
                 
                 <div className="text-center">
@@ -116,7 +129,7 @@ const PlayerProfile = () => {
                     <Activity className="w-6 h-6 mx-auto text-arcade-red" />
                   </div>
                   <div className="text-xl font-bold text-white">{player.losses}</div>
-                  <div className="text-white/60 text-sm">Losses</div>
+                  <div className="text-white/60 text-sm">Sconfitte</div>
                 </div>
                 
                 <div className="text-center">
@@ -124,7 +137,7 @@ const PlayerProfile = () => {
                     <Star className="w-6 h-6 mx-auto text-arcade-yellow" />
                   </div>
                   <div className="text-xl font-bold text-white">{player.pointsScored}</div>
-                  <div className="text-white/60 text-sm">Points</div>
+                  <div className="text-white/60 text-sm">Punti</div>
                 </div>
                 
                 <div className="text-center">
@@ -142,27 +155,27 @@ const PlayerProfile = () => {
       
       {/* Stats Section */}
       <div className="mb-8">
-        <h2 className="text-2xl font-arcade text-white mb-4">Player Stats</h2>
+        <h2 className="text-2xl font-arcade text-white mb-4">Statistiche Giocatore</h2>
         <div className="arcade-card p-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             <div className="bg-arcade-darker p-4 rounded-lg text-center">
               <div className="text-xl font-bold text-arcade-green">{stats.winRate}%</div>
-              <div className="text-white/60 text-sm">Win Rate</div>
+              <div className="text-white/60 text-sm">% Vittorie</div>
             </div>
             
             <div className="bg-arcade-darker p-4 rounded-lg text-center">
               <div className="text-xl font-bold text-arcade-blue">{stats.averageScore}</div>
-              <div className="text-white/60 text-sm">Avg. Score</div>
+              <div className="text-white/60 text-sm">Media Punti</div>
             </div>
             
             <div className="bg-arcade-darker p-4 rounded-lg text-center">
               <div className="text-xl font-bold text-arcade-yellow">{stats.highestScore}</div>
-              <div className="text-white/60 text-sm">Highest Score</div>
+              <div className="text-white/60 text-sm">Punteggio Max</div>
             </div>
             
             <div className="bg-arcade-darker p-4 rounded-lg text-center">
               <div className="text-xl font-bold text-arcade-purple">{stats.longestStreak}</div>
-              <div className="text-white/60 text-sm">Longest Streak</div>
+              <div className="text-white/60 text-sm">Serie Vittorie</div>
             </div>
           </div>
         </div>
@@ -170,19 +183,19 @@ const PlayerProfile = () => {
       
       {/* Recent Matches */}
       <div>
-        <h2 className="text-2xl font-arcade text-white mb-4">Recent Matches</h2>
+        <h2 className="text-2xl font-arcade text-white mb-4">Partite Recenti</h2>
         {recentMatches.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {recentMatches.map(match => {
-              const isPlayer1 = match.player1Id === player.id;
-              const opponent = getPlayer(isPlayer1 ? match.player2Id : match.player1Id);
+              const isPlayer1 = match.player1._id === player._id;
+              const opponent = isPlayer1 ? match.player2 : match.player1;
               const playerScore = isPlayer1 ? match.player1Score : match.player2Score;
               const opponentScore = isPlayer1 ? match.player2Score : match.player1Score;
-              const playerWon = match.winner === player.id;
+              const playerWon = isPlayer1 ? match.player1Score > match.player2Score : match.player2Score > match.player1Score;
               
               return (
                 <div 
-                  key={match.id} 
+                  key={match._id} 
                   className={cn(
                     "arcade-card p-4 border-l-4",
                     match.status === 'completed' 
@@ -194,39 +207,34 @@ const PlayerProfile = () => {
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                      <div className="pixel-box w-12 h-12 flex-shrink-0">
-                        {opponent ? (
-                          <img src={opponent.avatar} alt={opponent.name} className="w-full h-full object-cover" />
+                      <div className="pixel-box w-12 h-12 flex-shrink-0 bg-arcade-darker">
+                        {opponent.avatarUrl ? (
+                          <img 
+                          src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(opponent.name)}&backgroundColor=0ea5e9`} 
+                            alt={opponent.name} 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${opponent.name}`;
+                            }}
+                          />
                         ) : (
-                          <User className="w-6 h-6 m-auto text-white/50" />
+                          <div className="w-full h-full flex items-center justify-center">
+                            <User className="w-6 h-6 text-white/50" />
+                          </div>
                         )}
                       </div>
                       <div>
-                        <p className="text-white font-pixel">vs. {opponent?.name || "Unknown Player"}</p>
-                        <p className="text-white/60 text-sm">
-                          {new Date(match.date).toLocaleDateString()}
-                        </p>
+                        <div className="font-pixel text-white">{opponent.name}</div>
+                        <div className="text-sm text-white/60">
+                          {new Date(match.playedAt).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="text-right">
-                      <div className="text-white font-pixel text-xl">
-                        {playerScore} - {opponentScore}
-                      </div>
-                      <div className={cn(
-                        "text-sm font-pixel",
-                        match.status === 'completed'
-                          ? playerWon
-                            ? "text-arcade-green"
-                            : "text-arcade-red"
-                          : "text-arcade-blue"
-                      )}>
-                        {match.status === 'completed'
-                          ? playerWon ? "Victory" : "Defeat"
-                          : match.status === 'in-progress'
-                            ? "In Progress"
-                            : "Scheduled"}
-                      </div>
+                    <div className="font-arcade text-xl text-white">
+                      <span className={playerWon ? "text-arcade-green" : "text-white"}>{playerScore}</span>
+                      <span className="mx-2">-</span>
+                      <span className={!playerWon ? "text-arcade-red" : "text-white"}>{opponentScore}</span>
                     </div>
                   </div>
                 </div>
@@ -234,8 +242,8 @@ const PlayerProfile = () => {
             })}
           </div>
         ) : (
-          <div className="arcade-card p-6 text-center">
-            <p className="text-white/60">No matches found</p>
+          <div className="arcade-card text-center py-6">
+            <p className="text-white/60 font-pixel text-sm">Nessuna partita recente</p>
           </div>
         )}
       </div>

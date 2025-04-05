@@ -71,7 +71,7 @@ const Index = () => {
               <Trophy className="w-16 h-16 text-primary" />
             </div>
             <h1 className="text-4xl font-arcade text-white">
-              HBS <span className="text-primary glow-text animate-blink">BBB</span> <span className="text-white glow-text animate-blink">PONG</span>
+              HBS <span className="text-primary glow-text animate-blink">PING</span> <span className="text-white glow-text animate-blink">PONG</span>
             </h1>
           </div>
         </div>
@@ -88,11 +88,11 @@ const Index = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-primary" />
-              <h2 className="text-lg font-arcade text-white">Recent</h2>
+              <h2 className="text-lg font-arcade text-white">Recenti</h2>
             </div>
             
             <Link to="/matches" className="text-primary font-pixel flex items-center gap-1 neon-underline text-sm">
-              <span>All</span>
+              <span>Altro</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -109,7 +109,7 @@ const Index = () => {
               ))
             ) : (
               <div className="arcade-card text-center py-6">
-                <p className="text-white/60 font-pixel text-sm">No matches yet</p>
+                <p className="text-white/60 font-pixel text-sm">Nessuna partita</p>
               </div>
             )}
           </div>
@@ -186,7 +186,7 @@ const Index = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="player1Score" className="text-arcade-purple">Punteggio {selectedPlayer1?.name}</Label>
+                <Label htmlFor="player1Score" className="text-arcade-purple">Punteggio {selectedPlayer1?.name || 'Giocatore 1'}</Label>
                 <Input
                   id="player1Score"
                   type="number"
@@ -198,7 +198,7 @@ const Index = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="player2Score" className="text-arcade-purple">Punteggio {selectedPlayer2?.name}</Label>
+                <Label htmlFor="player2Score" className="text-arcade-purple">Punteggio {selectedPlayer2?.name || 'Giocatore 2'}</Label>
                 <Input
                   id="player2Score"
                   type="number"
@@ -216,7 +216,7 @@ const Index = () => {
               disabled={!selectedPlayer1 || !selectedPlayer2 || isLoading}
               className="bg-arcade-purple hover:bg-arcade-purple/90"
             >
-              {isLoading ? 'Aggiungimento...' : 'Aggiungi Match'}
+              {isLoading ? 'Aggiungendo...' : 'Aggiungi Match'}
             </Button>
           </DialogFooter>
         </DialogContent>
