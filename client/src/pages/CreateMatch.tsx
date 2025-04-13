@@ -18,6 +18,9 @@ const CreateMatch = () => {
   const [matchTime, setMatchTime] = useState(format(new Date(), 'HH:mm'));
   const [errors, setErrors] = useState<Record<string, string>>({});
   
+  // Filtra i giocatori abilitati
+  const enabledPlayers = players.filter(player => !player.disabled);
+  
   // Reset errors when inputs change
   useEffect(() => {
     setErrors({});
@@ -61,13 +64,23 @@ const CreateMatch = () => {
       // Create match date
       const dateTime = new Date(`${matchDate}T${matchTime}`);
       
+      // Trova i giocatori selezionati
+      const player1 = enabledPlayers.find(p => p._id === player1Id);
+      const player2 = enabledPlayers.find(p => p._id === player2Id);
+      
+      if (!player1 || !player2) {
+        toast.error('Uno o entrambi i giocatori non sono stati trovati');
+        return;
+      }
+      
       // Create new match
       await addMatch({
-        player1: player1Id,
-        player2: player2Id,
+        player1,
+        player2,
         player1Score,
         player2Score,
-        playedAt: dateTime.toISOString()
+        playedAt: dateTime.toISOString(),
+        status: 'completed'
       });
       
       toast.success('Match created successfully!');
@@ -111,7 +124,7 @@ const CreateMatch = () => {
                   )}
                 >
                   <option value="">Select Player 1</option>
-                  {players.map(player => (
+                  {enabledPlayers.map(player => (
                     <option key={player._id} value={player._id}>
                       {player.name}
                     </option>
@@ -144,7 +157,7 @@ const CreateMatch = () => {
                   )}
                 >
                   <option value="">Select Player 2</option>
-                  {players
+                  {enabledPlayers
                     .filter(player => player._id !== player1Id)
                     .map(player => (
                       <option key={player._id} value={player._id}>
