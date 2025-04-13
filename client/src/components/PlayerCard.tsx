@@ -1,5 +1,5 @@
 import { Player } from '@/services/api';
-import { Trophy, X } from 'lucide-react';
+import { Trophy, X, Pencil } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface PlayerCardProps {
@@ -8,6 +8,7 @@ interface PlayerCardProps {
   selected?: boolean;
   onSelect?: () => void;
   onRemove?: () => void;
+  onEdit?: () => void;
 }
 
 const PlayerCard = ({ 
@@ -15,7 +16,8 @@ const PlayerCard = ({
   rank, 
   selected = false,
   onSelect,
-  onRemove
+  onRemove,
+  onEdit
 }: PlayerCardProps) => {
   return (
     <Link 
@@ -50,8 +52,22 @@ const PlayerCard = ({
           <X className="w-5 h-5" />
         </button>
       )}
+
+      {onEdit && (
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onEdit();
+          }}
+          className="absolute top-2 right-12 w-8 h-8 flex items-center justify-center rounded-full bg-arcade-blue/90 text-white hover:bg-arcade-blue transition-colors"
+          aria-label="Edit player"
+        >
+          <Pencil className="w-5 h-5" />
+        </button>
+      )}
       
-      <div className="flex items-center gap-4 p-4">
+      <div className="p-4 flex items-center">
         <div className="pixel-box w-16 h-16 flex-shrink-0">
           <img 
             src={player.avatarUrl} 

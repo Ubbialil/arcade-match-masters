@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import PlayerCard from '@/components/PlayerCard';
-import { Plus, Search, Users } from 'lucide-react';
+import { Plus, Search, Users, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { playerService, Player } from '@/services/api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -10,11 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const Players = () => {
-  const { players, addPlayer } = useApp();
+  const { players, addPlayer, reloadPlayers } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [editedName, setEditedName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   
   // Sort players by rating
   const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
@@ -45,6 +49,31 @@ const Players = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEditPlayer = async () => {
+    if (!editingPlayer || !editedName.trim()) return;
+    
+    setIsEditing(true);
+    try {
+      await playerService.update(editingPlayer._id, {
+        name: editedName
+      });
+      await reloadPlayers();
+      setIsEditModalOpen(false);
+      setEditingPlayer(null);
+      setEditedName('');
+    } catch (error) {
+      console.error('Errore durante la modifica del giocatore:', error);
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  const openEditModal = (player: Player) => {
+    setEditingPlayer(player);
+    setEditedName(player.name);
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -85,6 +114,7 @@ const Players = () => {
             key={player._id} 
             player={player} 
             rank={index + 1}
+            onEdit={() => openEditModal(player)}
           />
         ))}
         
@@ -124,6 +154,39 @@ const Players = () => {
               className="bg-primary hover:bg-primary/90 text-black font-pixel py-3 px-6 rounded-md shadow-md shadow-primary/30"
             >
               {isLoading ? 'Aggiungimento...' : 'Aggiungi Giocatore'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Modifica Giocatore */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="bg-arcade-dark border border-arcade-blue/20 shadow-lg shadow-arcade-blue/20">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-arcade text-white flex items-center gap-2">
+              <Pencil className="w-6 h-6 text-arcade-blue" />
+              <span>Modifica Giocatore</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name" className="text-white/70 font-pixel">Nome</Label>
+              <Input
+                id="edit-name"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                placeholder="Nuovo nome del giocatore"
+                className="bg-white/5 border-arcade-blue/20 text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-arcade-blue/50"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleEditPlayer}
+              disabled={!editedName.trim() || isEditing}
+              className="bg-primary hover:bg-primary/90 text-black font-pixel py-3 px-6 rounded-md shadow-md shadow-primary/30"
+            >
+              {isEditing ? 'Modifica in corso...' : 'Salva Modifiche'}
             </Button>
           </DialogFooter>
         </DialogContent>
