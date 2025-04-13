@@ -129,9 +129,9 @@ const CreateMatch = () => {
                       : "border-arcade-blue/20 focus:ring-arcade-blue/50"
                   )}
                 >
-                  <option value="">Select Player 1</option>
+                  <option value="" className="bg-arcade-dark text-white">Select Player 1</option>
                   {enabledPlayers.map(player => (
-                    <option key={player._id} value={player._id}>
+                    <option key={player._id} value={player._id} className="bg-arcade-dark text-white">
                       {player.name}
                     </option>
                   ))}
@@ -162,11 +162,11 @@ const CreateMatch = () => {
                       : "border-arcade-blue/20 focus:ring-arcade-blue/50"
                   )}
                 >
-                  <option value="">Select Player 2</option>
+                  <option value="" className="bg-arcade-dark text-white">Select Player 2</option>
                   {enabledPlayers
                     .filter(player => player._id !== player1Id)
                     .map(player => (
-                      <option key={player._id} value={player._id}>
+                      <option key={player._id} value={player._id} className="bg-arcade-dark text-white">
                         {player.name}
                       </option>
                     ))
