@@ -42,7 +42,7 @@ async function updatePlayers() {
       
       // Aggiorna tutti i documenti aggiungendo il campo disabled
       const result = await players.updateMany(
-        { disabled: { $exists: false } },
+        {},
         { $set: { disabled: false } }
       );
       

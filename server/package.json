@@ -4,9 +4,11 @@
   "description": "Backend server for HBS PingPong game",
   "main": "dist/server.js",
   "scripts": {
+    "prebuild": "ts-node src/scripts/updatePlayers.ts",
+    "build": "tsc",
+    "prestart": "ts-node src/scripts/updatePlayers.ts",
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
-    "build": "tsc",
     "update-db": "ts-node src/scripts/updatePlayers.ts"
   },
   "dependencies": {

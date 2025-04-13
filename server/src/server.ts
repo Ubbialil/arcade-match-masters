@@ -18,6 +18,11 @@ app.use('/api/matches', matchRoutes);
 // Verifica versione database all'avvio
 async function checkDatabaseVersion() {
   try {
+    if (!mongoose.connection.db) {
+      console.error('Database non connesso');
+      return;
+    }
+
     const versions = mongoose.connection.db.collection('versions');
     const currentVersion = await versions.findOne({}, { sort: { _id: -1 } }) as DatabaseVersion | null;
 
