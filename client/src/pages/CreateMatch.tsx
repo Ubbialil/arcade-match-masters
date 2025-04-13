@@ -12,8 +12,8 @@ const CreateMatch = () => {
   
   const [player1Id, setPlayer1Id] = useState('');
   const [player2Id, setPlayer2Id] = useState('');
-  const [player1Score, setPlayer1Score] = useState(0);
-  const [player2Score, setPlayer2Score] = useState(0);
+  const [player1Score, setPlayer1Score] = useState('');
+  const [player2Score, setPlayer2Score] = useState('');
   const [matchDate, setMatchDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [matchTime, setMatchTime] = useState(format(new Date(), 'HH:mm'));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -24,7 +24,7 @@ const CreateMatch = () => {
   // Reset errors when inputs change
   useEffect(() => {
     setErrors({});
-  }, [player1Id, player2Id, matchDate, matchTime]);
+  }, [player1Id, player2Id, matchDate, matchTime, player1Score, player2Score]);
   
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -47,6 +47,12 @@ const CreateMatch = () => {
     
     if (!matchTime) {
       newErrors.time = 'Select a time';
+    }
+
+    if (!player1Score || !player2Score) {
+      newErrors.score = 'Inserisci i punteggi';
+    } else if (player1Score === player2Score) {
+      newErrors.score = 'Il pareggio non è permesso';
     }
     
     setErrors(newErrors);
@@ -77,8 +83,8 @@ const CreateMatch = () => {
       await addMatch({
         player1,
         player2,
-        player1Score,
-        player2Score,
+        player1Score: parseInt(player1Score),
+        player2Score: parseInt(player2Score),
         playedAt: dateTime.toISOString(),
         status: 'completed'
       });
@@ -185,8 +191,13 @@ const CreateMatch = () => {
                 type="number"
                 min="0"
                 value={player1Score}
-                onChange={(e) => setPlayer1Score(parseInt(e.target.value) || 0)}
-                className="bg-white/5 border text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 border-arcade-blue/20 focus:ring-arcade-blue/50"
+                onChange={(e) => setPlayer1Score(e.target.value)}
+                className={cn(
+                  "bg-white/5 border text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2",
+                  errors.score 
+                    ? "border-arcade-red/50 focus:ring-arcade-red/50" 
+                    : "border-arcade-blue/20 focus:ring-arcade-blue/50"
+                )}
               />
             </div>
             
@@ -197,8 +208,13 @@ const CreateMatch = () => {
                 type="number"
                 min="0"
                 value={player2Score}
-                onChange={(e) => setPlayer2Score(parseInt(e.target.value) || 0)}
-                className="bg-white/5 border text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 border-arcade-blue/20 focus:ring-arcade-blue/50"
+                onChange={(e) => setPlayer2Score(e.target.value)}
+                className={cn(
+                  "bg-white/5 border text-white font-pixel w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2",
+                  errors.score 
+                    ? "border-arcade-red/50 focus:ring-arcade-red/50" 
+                    : "border-arcade-blue/20 focus:ring-arcade-blue/50"
+                )}
               />
             </div>
             
@@ -252,6 +268,15 @@ const CreateMatch = () => {
               )}
             </div>
           </div>
+          
+          {errors.score && (
+            <div className="mb-6 text-center">
+              <p className="text-arcade-red text-sm font-pixel flex items-center justify-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.score}
+              </p>
+            </div>
+          )}
           
           <div className="flex justify-center">
             <button
