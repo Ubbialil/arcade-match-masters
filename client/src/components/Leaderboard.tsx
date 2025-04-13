@@ -16,7 +16,7 @@ const Leaderboard = () => {
     <div className="w-full arcade-card animate-scale-in">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="w-6 h-6 text-yellow-400" />
-        <h2 className="text-2xl font-arcade text-white">Leaderboard</h2>
+        <h2 className="text-2xl font-arcade text-white">Classifica</h2>
       </div>
       
       <div className="overflow-hidden rounded-md border border-arcade-blue/20">
