@@ -10,6 +10,10 @@ interface AppContextType {
   getMatch: (id: string) => Match | undefined;
   reloadMatches: () => Promise<void>;
   reloadPlayers: () => Promise<void>;
+  updatePlayer: (id: string, data: Partial<Player>) => Promise<void>;
+  removePlayer: (id: string) => Promise<void>;
+  updateMatch: (id: string, data: Partial<Match>) => Promise<void>;
+  removeMatch: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -80,6 +84,25 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return matches.find(match => match._id === id);
   };
 
+  const updatePlayer = async (id: string, data: Partial<Player>) => {
+    const updatedPlayer = await playerService.update(id, data);
+    setPlayers(prev => prev.map(p => p._id === id ? updatedPlayer : p));
+  };
+
+  const removePlayer = async (id: string) => {
+    await playerService.delete(id);
+    setPlayers(prev => prev.filter(p => p._id !== id));
+  };
+
+  const updateMatch = async (id: string, data: Partial<Match>) => {
+    const updatedMatch = await matchService.update(id, data);
+    setMatches(prev => prev.map(m => m._id === id ? updatedMatch : m));
+  };
+
+  const removeMatch = (id: string) => {
+    setMatches(prev => prev.filter(m => m._id !== id));
+  };
+
   return (
     <AppContext.Provider value={{
       players,
@@ -89,7 +112,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       addMatch,
       getMatch,
       reloadMatches,
-      reloadPlayers
+      reloadPlayers,
+      updatePlayer,
+      removePlayer,
+      updateMatch,
+      removeMatch
     }}>
       {children}
     </AppContext.Provider>

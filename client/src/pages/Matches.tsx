@@ -5,9 +5,10 @@ import ScoreTracker from '@/components/ScoreTracker';
 import { Plus, Calendar, AlignLeft, Filter, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { matchService } from '@/services/api';
 
 const Matches = () => {
-  const { matches } = useApp();
+  const { matches, removeMatch, updatePlayer, players } = useApp();
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   // const [filterStatus, setFilterStatus] = useState<string>('all');
   // const [showFilters, setShowFilters] = useState(false);
@@ -30,6 +31,72 @@ const Matches = () => {
     // if (match && match.status === 'in-progress') {
       setActiveMatchId(matchId);
     // }
+  };
+
+  const handleDeleteMatch = async (matchId: string) => {
+    try {
+      const matchToDelete = matches.find(m => m._id === matchId);
+      if (!matchToDelete) return;
+
+      // Elimina il match
+      await matchService.delete(matchId);
+      removeMatch(matchId);
+
+      // Aggiorna le statistiche dei giocatori
+      const player1 = players.find(p => p._id === matchToDelete.player1._id);
+      const player2 = players.find(p => p._id === matchToDelete.player2._id);
+
+      if (player1 && player2) {
+        // Aggiorna le statistiche del player1
+        const player1Wins = matches
+          .filter(m => m._id !== matchId)
+          .filter(m => m.player1._id === player1._id && m.player1Score > m.player2Score || 
+                     m.player2._id === player1._id && m.player2Score > m.player1Score)
+          .length;
+
+        const player1Losses = matches
+          .filter(m => m._id !== matchId)
+          .filter(m => m.player1._id === player1._id && m.player1Score < m.player2Score || 
+                     m.player2._id === player1._id && m.player2Score < m.player1Score)
+          .length;
+
+        const player1WinRate = player1Wins + player1Losses > 0 
+          ? (player1Wins / (player1Wins + player1Losses)) * 100 
+          : 0;
+
+        await updatePlayer(player1._id, {
+          wins: player1Wins,
+          losses: player1Losses,
+          winRate: player1WinRate
+        });
+
+        // Aggiorna le statistiche del player2
+        const player2Wins = matches
+          .filter(m => m._id !== matchId)
+          .filter(m => m.player1._id === player2._id && m.player1Score > m.player2Score || 
+                     m.player2._id === player2._id && m.player2Score > m.player1Score)
+          .length;
+
+        const player2Losses = matches
+          .filter(m => m._id !== matchId)
+          .filter(m => m.player1._id === player2._id && m.player1Score < m.player2Score || 
+                     m.player2._id === player2._id && m.player2Score < m.player1Score)
+          .length;
+
+        const player2WinRate = player2Wins + player2Losses > 0 
+          ? (player2Wins / (player2Wins + player2Losses)) * 100 
+          : 0;
+
+        await updatePlayer(player2._id, {
+          wins: player2Wins,
+          losses: player2Losses,
+          winRate: player2WinRate
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting match:', error);
+      throw error;
+    }
   };
 
   return (
@@ -98,8 +165,9 @@ const Matches = () => {
             <MatchItem 
               key={match._id} 
               match={match}
-              showActions={false}
+              showActions={true}
               onClick={() => handleMatchClick(match._id)}
+              onDelete={handleDeleteMatch}
             />
           ))
         ) : (
