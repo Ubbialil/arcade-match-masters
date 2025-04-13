@@ -6,15 +6,17 @@ import { Link } from 'react-router-dom';
 const Leaderboard = () => {
   const { players } = useApp();
   
-  // Sort players by rating and then by win rate
-  const sortedPlayers = [...players].sort((a, b) => {
-    // Prima ordina per rating
-    if (b.rating !== a.rating) {
-      return b.rating - a.rating;
-    }
-    // A parità di rating, ordina per percentuale di vittorie
-    return b.winRate - a.winRate;
-  });
+  // Filtra i giocatori attivi e ordina per rating e win rate
+  const sortedPlayers = [...players]
+    .filter(player => !player.disabled)
+    .sort((a, b) => {
+      // Prima ordina per rating
+      if (b.rating !== a.rating) {
+        return b.rating - a.rating;
+      }
+      // A parità di rating, ordina per percentuale di vittorie
+      return b.winRate - a.winRate;
+    });
 
   return (
     <div className="w-full arcade-card animate-scale-in">
