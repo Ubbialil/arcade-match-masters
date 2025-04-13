@@ -6,10 +6,14 @@ import { Link } from 'react-router-dom';
 const Leaderboard = () => {
   const { players } = useApp();
   
-  // Sort players by wins and then by rating
+  // Sort players by rating and then by win rate
   const sortedPlayers = [...players].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    return b.rating - a.rating;
+    // Prima ordina per rating
+    if (b.rating !== a.rating) {
+      return b.rating - a.rating;
+    }
+    // A parità di rating, ordina per percentuale di vittorie
+    return b.winRate - a.winRate;
   });
 
   return (
@@ -59,7 +63,7 @@ const Leaderboard = () => {
                   )}
                 </div>
                 
-                <div className="col-span-3 md:col-span-2 flex items-center gap-2">
+                <div className="col-span-3 md:col-span-2 flex items-center gap-3">
                   <div className="relative w-8 h-8 rounded-full overflow-hidden bg-black/30">
                     <img 
                       src={player.avatarUrl} 
