@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import PlayerCard from '@/components/PlayerCard';
-import { Plus, Search, Users, Pencil } from 'lucide-react';
+import { Plus, Search, Users, Pencil, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { playerService, Player } from '@/services/api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -20,8 +20,15 @@ const Players = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Sort players by rating
-  const sortedPlayers = [...players].sort((a, b) => b.rating - a.rating);
+  // Sort players by rating and disabled status
+  const sortedPlayers = [...players].sort((a, b) => {
+    // Prima ordina per stato disabilitato (i disabilitati vanno in fondo)
+    if (a.disabled !== b.disabled) {
+      return a.disabled ? 1 : -1;
+    }
+    // Poi ordina per rating
+    return b.rating - a.rating;
+  });
   
   // Filter players based on search
   const filteredPlayers = sortedPlayers.filter(player => 
@@ -38,7 +45,8 @@ const Players = () => {
         name: newPlayerName,
         email: `${newPlayerName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
         password: 'password123', // In un'app reale, questo dovrebbe essere gestito in modo sicuro
-        avatarUrl
+        avatarUrl,
+        disabled: false
       });
       
       addPlayer(newPlayer);
@@ -67,6 +75,17 @@ const Players = () => {
       console.error('Errore durante la modifica del giocatore:', error);
     } finally {
       setIsEditing(false);
+    }
+  };
+
+  const handleToggleDisable = async (player: Player) => {
+    try {
+      await playerService.update(player._id, {
+        disabled: !player.disabled
+      });
+      await reloadPlayers();
+    } catch (error) {
+      console.error('Errore durante la modifica dello stato del giocatore:', error);
     }
   };
 
@@ -115,6 +134,7 @@ const Players = () => {
             player={player} 
             rank={index + 1}
             onEdit={() => openEditModal(player)}
+            onToggleDisable={() => handleToggleDisable(player)}
           />
         ))}
         

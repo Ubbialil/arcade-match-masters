@@ -21,6 +21,7 @@ export interface Player {
   matchesPlayed?: number;
   winRate?: number;
   pointsScored: number;
+  disabled: boolean;
   createdAt: string;
   updatedAt: string;
 }

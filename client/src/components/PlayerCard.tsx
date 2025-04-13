@@ -1,5 +1,5 @@
 import { Player } from '@/services/api';
-import { Trophy, X, Pencil } from 'lucide-react';
+import { Trophy, X, Pencil, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface PlayerCardProps {
@@ -9,6 +9,7 @@ interface PlayerCardProps {
   onSelect?: () => void;
   onRemove?: () => void;
   onEdit?: () => void;
+  onToggleDisable?: () => void;
 }
 
 const PlayerCard = ({ 
@@ -17,7 +18,8 @@ const PlayerCard = ({
   selected = false,
   onSelect,
   onRemove,
-  onEdit
+  onEdit,
+  onToggleDisable
 }: PlayerCardProps) => {
   return (
     <Link 
@@ -27,6 +29,7 @@ const PlayerCard = ({
         transition-all duration-200 
         ${onSelect ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''}
         ${selected ? 'ring-2 ring-primary' : ''}
+        ${player.disabled ? 'opacity-50 grayscale' : ''}
       `}
       onClick={onSelect ? (e) => {
         e.preventDefault(); // Prevent navigation when used as a selectable card
@@ -37,6 +40,20 @@ const PlayerCard = ({
         <div className="absolute top-0 left-0 bg-primary px-3 py-1">
           <span className="font-pixel text-white">#{rank}</span>
         </div>
+      )}
+
+      {onToggleDisable && (
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleDisable();
+          }}
+          className="absolute top-2 right-24 w-8 h-8 flex items-center justify-center rounded-full bg-arcade-purple/90 text-white hover:bg-arcade-purple transition-colors"
+          aria-label={player.disabled ? "Enable player" : "Disable player"}
+        >
+          {player.disabled ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+        </button>
       )}
       
       {onRemove && (

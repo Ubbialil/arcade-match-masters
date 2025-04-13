@@ -11,6 +11,7 @@ interface IPlayer {
   matchesPlayed: number;
   winRate: number;
   pointsScored: number;
+  disabled: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +26,8 @@ const playerSchema = new Schema<IPlayer>({
   losses: { type: Number, default: 0 },
   matchesPlayed: { type: Number, default: 0 },
   winRate: { type: Number, default: 0 },
-  pointsScored: { type: Number, default: 0 }
+  pointsScored: { type: Number, default: 0 },
+  disabled: { type: Boolean, default: false }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
